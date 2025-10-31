@@ -13,7 +13,7 @@ try{
   }
 }catch(e){console.warn('user badge failed', e)}
 
-let loggedUser = null; // Variável global para o usuário logado
+let loggedUser = null; 
 try{
   const cur = localStorage.getItem('currentUser');
   if(!cur) { window.location = '../index.html'; }
@@ -22,7 +22,7 @@ try{
     if(!u || u.role !== 'usuario') { 
       window.location = '../index.html'; 
     } else {
-      loggedUser = u; // Salva o usuário logado 
+      loggedUser = u; 
     }
   }
 }catch(e){ console.warn('auth guard failed', e); window.location = '../index.html'; }
@@ -33,7 +33,6 @@ async function loadUserTickets() {
       throw new Error('Usuário logado não tem um ID.');
     }
     
-    // Chama a nova rota da API, passando o ID do usuário
     const response = await fetch(`http://localhost:3000/api/tickets/user/${loggedUser.id}`);
     if (!response.ok) {
       throw new Error('Falha ao buscar chamados do servidor.');
@@ -126,7 +125,7 @@ function urgClass(u) {
   return "urg-baixa";
 }
 
-// tabs
+
 function switchTab(e) {
   document
     .querySelectorAll(".tab")

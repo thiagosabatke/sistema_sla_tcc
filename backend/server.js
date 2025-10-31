@@ -1,6 +1,9 @@
 const express = require('express');
 const mysql = require('mysql2/promise'); 
 const cors = require('cors');
+require('dotenv').config();
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors()); 
@@ -14,6 +17,15 @@ const dbConfig = {
     database: 'meu_tcc_db'        
 };
 
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: true, 
+    auth: {
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS, 
+    },
+});
 
 
 app.post('/login', async (req, res) => {
@@ -86,6 +98,111 @@ app.post('/register', async (req, res) => {
     }
 });
 
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [rows] = await connection.execute(
+            'SELECT * FROM Users WHERE email = ?',
+            [email]
+        );
+
+        if (rows.length === 0) {
+            // Não informe que o email não existe (por segurança)
+            await connection.end();
+            console.log("Solicitação (falha-segura) de redefinição para:", email);
+            return res.json({ success: true, message: 'Se um usuário com este email existir, um link de redefinição será enviado.' });
+        }
+
+        const user = rows[0];
+
+        // 1. Gerar Token
+        const token = crypto.randomBytes(20).toString('hex');
+
+        // 2. Definir tempo de expiração (1 hora)
+        const expires = new Date(Date.now() + 3600000); // 1 hora em ms
+
+        // 3. Salvar token e expiração no banco
+        await connection.execute(
+            'UPDATE Users SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE id = ?',
+            [token, expires, user.id]
+        );
+        
+        await connection.end();
+
+        // 4. Criar o link de redefinição
+        // !! IMPORTANTE: Altere 'http://127.0.0.1:5500' para o endereço ONDE SEU FRONTEND RODA !!
+        // Se você usa o Live Server do VSCode, é provável que seja essa a porta.
+        const resetLink = `http://127.0.0.1:5500/reset-password.html?token=${token}`;
+
+        // 5. Configurar o email
+        const mailOptions = {
+            from: `"Sistema TCC" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: 'Redefinição de Senha - Sistema de Chamados',
+            html: `
+                <p>Olá ${user.name},</p>
+                <p>Você solicitou a redefinição da sua senha.</p>
+                <p>Clique no link abaixo para criar uma nova senha:</p>
+                <a href="${resetLink}" target="_blank">${resetLink}</a>
+                <p>Este link expira em 1 hora.</p>
+                <p>Se você não solicitou isso, por favor, ignore este email.</p>
+            `
+        };
+
+        // 6. Enviar o email
+        await transporter.sendMail(mailOptions);
+        
+        res.json({ success: true, message: 'Se um usuário com este email existir, um link de redefinição será enviado.' });
+
+    } catch (error) {
+        console.error("Erro em /forgot-password:", error);
+        res.status(500).json({ success: false, message: 'Erro no servidor.' });
+    }
+});
+
+
+// ROTA 2: Redefinir a senha (salvando em texto puro)
+app.post('/reset-password', async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+        return res.status(400).json({ success: false, message: 'Token e nova senha são obrigatórios.' });
+    }
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+
+        // 1. Encontrar o usuário pelo token E verificar se não expirou
+        const [rows] = await connection.execute(
+            'SELECT * FROM Users WHERE resetPasswordToken = ? AND resetPasswordExpires > NOW()',
+            [token]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(400).json({ success: false, message: 'Token inválido ou expirado.' });
+        }
+
+        const user = rows[0];
+
+        // 2. Atualizar a senha (em TEXTO PURO) e limpar o token
+        await connection.execute(
+            'UPDATE Users SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL WHERE id = ?',
+            [password, user.id] // Salva a nova senha em texto puro
+        );
+        
+        await connection.end();
+
+        res.json({ success: true, message: 'Senha redefinida com sucesso!' });
+
+    } catch (error) {
+        console.error("Erro em /reset-password:", error);
+        res.status(500).json({ success: false, message: 'Erro no servidor ao redefinir a senha.' });
+    }
+});
 
 app.get('/api/tickets/analyst', async (req, res) => {
     try {
