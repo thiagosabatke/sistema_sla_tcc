@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador</title>
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/style_interno.css">
+</head>
+<body>
+    
+    <header>
+        <div class="container">
+            <h1>Painel do Administrador</h1>
+            <div class="user-info">
+                Logado como: <strong id="userName">Admin</strong>
+                (<a href="#" id="btnLogout">Sair</a>)
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <div class="page-title">
+            <h2>Gerenciamento de Usuários</h2>
+        </div>
+
+        <section class="card">
+            <h3>Cadastrar Novo Usuário</h3>
+            <p style="color: var(--text-secondary-color); margin-top: -10px; margin-bottom: 25px;">
+              Crie contas de Analista ou Usuário padrão.
+            </p>
+            
+            <form id="createUserForm">
+                
+                <div class="form-group">
+                    <label for="newName">Nome Completo:</label>
+                    <input type="text" id="newName" placeholder="Nome e Sobrenome" required>
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="newEmail">Email:</label>
+                    <input type="email" id="newEmail" placeholder="email@exemplo.com" required>
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="newPassword">Senha:</label>
+                    <input type="password" id="newPassword" placeholder="Senha" required>
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="newRole">Perfil:</label>
+                    <select id="newRole" required>
+                        <option value="">Selecione o Perfil</option>
+                        <option value="usuario">Usuário</option>
+                        <option value="analista">Analista</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn" style="margin-top: 20px; width: 100%;">Cadastrar Usuário</button>
+            </form>
+            
+            <div id="adminError" class="error-box" style="display:none; margin-top: 15px;"></div>
+            <div id="adminSuccess" class="success-box" style="display:none; margin-top: 15px;"></div>
+        </section>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>

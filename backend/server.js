@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root', 
-    password: 'SenhaGenerica', // Coloque a senha do MySql aqui
+    password: 'Thiago159753', // Coloque a senha do MySql aqui
     database: 'meu_tcc_db'        
 };
 
@@ -30,6 +30,10 @@ const transporter = nodemailer.createTransport({
 
 app.post('/login', async (req, res) => {
     const { email, password, role } = req.body;
+
+    if (role === 'admin') {
+        return res.status(403).json({ success: false, message: 'Acesso de administrador em rota incorreta.' });
+    }
 
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -55,48 +59,48 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+// app.post('/register', async (req, res) => {
+//     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Todos os campos (nome, email, senha, perfil) são obrigatórios.' 
-        });
-    }
+//     if (!name || !email || !password || !role) {
+//         return res.status(400).json({ 
+//             success: false, 
+//             message: 'Todos os campos (nome, email, senha, perfil) são obrigatórios.' 
+//         });
+//     }
 
-    try {
-        const connection = await mysql.createConnection(dbConfig);
+//     try {
+//         const connection = await mysql.createConnection(dbConfig);
         
-        const [existing] = await connection.execute(
-            'SELECT id FROM Users WHERE email = ?',
-            [email]
-        );
+//         const [existing] = await connection.execute(
+//             'SELECT id FROM Users WHERE email = ?',
+//             [email]
+//         );
 
-        if (existing.length > 0) {
-            await connection.end();
-            return res.status(409).json({ success: false, message: 'Este email já está cadastrado.' });
-        }
+//         if (existing.length > 0) {
+//             await connection.end();
+//             return res.status(409).json({ success: false, message: 'Este email já está cadastrado.' });
+//         }
 
-        const [result] = await connection.execute(
-            'INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            [name, email, password, role]
-        );
+//         const [result] = await connection.execute(
+//             'INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)',
+//             [name, email, password, role]
+//         );
         
-        await connection.end();
+//         await connection.end();
 
-        res.json({ success: true, userId: result.insertId, message: 'Usuário cadastrado com sucesso!' });
+//         res.json({ success: true, userId: result.insertId, message: 'Usuário cadastrado com sucesso!' });
 
-    } catch (error) {
-        console.error("Erro no cadastro:", error);
+//     } catch (error) {
+//         console.error("Erro no cadastro:", error);
         
-        if (error.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD') {
-             return res.status(400).json({ success: false, message: 'Perfil (role) inválido. Use "usuario" ou "analista".' });
-        }
+//         if (error.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD') {
+//              return res.status(400).json({ success: false, message: 'Perfil (role) inválido. Use "usuario" ou "analista".' });
+//         }
 
-        res.status(500).json({ success: false, message: 'Erro interno no servidor ao tentar cadastrar.' });
-    }
-});
+//         res.status(500).json({ success: false, message: 'Erro interno no servidor ao tentar cadastrar.' });
+//     }
+// });
 
 app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
@@ -110,7 +114,7 @@ app.post('/forgot-password', async (req, res) => {
         );
 
         if (rows.length === 0) {
-            // Não informe que o email não existe (por segurança)
+           
             await connection.end();
             console.log("Solicitação (falha-segura) de redefinição para:", email);
             return res.json({ success: true, message: 'Se um usuário com este email existir, um link de redefinição será enviado.' });
@@ -118,13 +122,10 @@ app.post('/forgot-password', async (req, res) => {
 
         const user = rows[0];
 
-        // 1. Gerar Token
         const token = crypto.randomBytes(20).toString('hex');
 
-        // 2. Definir tempo de expiração (1 hora)
-        const expires = new Date(Date.now() + 3600000); // 1 hora em ms
+        const expires = new Date(Date.now() + 3600000); 
 
-        // 3. Salvar token e expiração no banco
         await connection.execute(
             'UPDATE Users SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE id = ?',
             [token, expires, user.id]
@@ -132,12 +133,8 @@ app.post('/forgot-password', async (req, res) => {
         
         await connection.end();
 
-        // 4. Criar o link de redefinição
-        // !! IMPORTANTE: Altere 'http://127.0.0.1:5500' para o endereço ONDE SEU FRONTEND RODA !!
-        // Se você usa o Live Server do VSCode, é provável que seja essa a porta.
         const resetLink = `http://127.0.0.1:5500/reset-password.html?token=${token}`;
 
-        // 5. Configurar o email
         const mailOptions = {
             from: `"Sistema TCC" <${process.env.EMAIL_USER}>`,
             to: user.email,
@@ -152,7 +149,6 @@ app.post('/forgot-password', async (req, res) => {
             `
         };
 
-        // 6. Enviar o email
         await transporter.sendMail(mailOptions);
         
         res.json({ success: true, message: 'Se um usuário com este email existir, um link de redefinição será enviado.' });
@@ -164,7 +160,6 @@ app.post('/forgot-password', async (req, res) => {
 });
 
 
-// ROTA 2: Redefinir a senha (salvando em texto puro)
 app.post('/reset-password', async (req, res) => {
     const { token, password } = req.body;
 
@@ -175,7 +170,6 @@ app.post('/reset-password', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
 
-        // 1. Encontrar o usuário pelo token E verificar se não expirou
         const [rows] = await connection.execute(
             'SELECT * FROM Users WHERE resetPasswordToken = ? AND resetPasswordExpires > NOW()',
             [token]
@@ -188,10 +182,9 @@ app.post('/reset-password', async (req, res) => {
 
         const user = rows[0];
 
-        // 2. Atualizar a senha (em TEXTO PURO) e limpar o token
         await connection.execute(
             'UPDATE Users SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL WHERE id = ?',
-            [password, user.id] // Salva a nova senha em texto puro
+            [password, user.id] 
         );
         
         await connection.end();
@@ -201,6 +194,94 @@ app.post('/reset-password', async (req, res) => {
     } catch (error) {
         console.error("Erro em /reset-password:", error);
         res.status(500).json({ success: false, message: 'Erro no servidor ao redefinir a senha.' });
+    }
+});
+
+app.post('/admin-login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [rows] = await connection.execute(
+            'SELECT * FROM Users WHERE email = ? AND BINARY password = ? AND role = ?',
+            [email, password, 'admin'] 
+        );
+
+        await connection.end();
+
+        if (rows.length > 0) {
+            const user = rows[0];
+            delete user.password; 
+            res.json({ success: true, user: user });
+        } else {
+            res.status(401).json({ success: false, message: 'Credenciais de admin inválidas.' });
+        }
+    } catch (error) {
+        console.error("Erro no /admin-login:", error);
+        res.status(500).json({ success: false, message: 'Erro no servidor.' });
+    }
+});
+
+app.post('/api/admin/create-user', async (req, res) => {
+
+    const { name, email, password, role, adminId } = req.body;
+
+    if (!name || !email || !password || !role || !adminId) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Todos os campos (nome, email, senha, perfil, adminId) são obrigatórios.' 
+        });
+    }
+
+    if (role === 'admin') {
+         return res.status(403).json({ 
+            success: false, 
+            message: 'Não é permitido criar outro admin por esta interface.' 
+        });
+    }
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        
+        const [adminRows] = await connection.execute(
+            'SELECT role FROM Users WHERE id = ?',
+            [adminId]
+        );
+
+        if (adminRows.length === 0 || adminRows[0].role !== 'admin') {
+            await connection.end();
+            return res.status(403).json({ success: false, message: 'Ação não autorizada. Apenas administradores podem criar usuários.' });
+        }
+
+        const [existing] = await connection.execute(
+            'SELECT id FROM Users WHERE email = ?',
+            [email]
+        );
+
+        if (existing.length > 0) {
+            await connection.end();
+            return res.status(409).json({ success: false, message: 'Este email já está cadastrado.' });
+        }
+
+        // 3. CRIAR O NOVO USUÁRIO
+        const [result] = await connection.execute(
+            'INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)',
+            [name, email, password, role] 
+        );
+        
+        await connection.end();
+        res.json({ success: true, userId: result.insertId, message: 'Usuário cadastrado com sucesso!' });
+
+    } catch (error) {
+        console.error("Erro em /api/admin/create-user:", error);
+        if (connection) await connection.end();
+        
+        if (error.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD') {
+             return res.status(400).json({ success: false, message: 'Perfil (role) inválido. Use "usuario" ou "analista".' });
+        }
+        res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
     }
 });
 

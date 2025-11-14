@@ -1,206 +1,148 @@
-/* Index-specific styling (keeps visual compact) */
-:root {
-  --bg: #071023;
-  --panel: rgba(255, 255, 255, 0.02);
-  --muted: #9aa6bd;
-  --btn: #2563eb;
-}
-body {
-  background: linear-gradient(180deg, #071023 0%, #061022 100%);
-  color: var(--btn);
-}
-.wrap {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.card {
-  background: var(--panel);
-  padding: 28px;
-  border-radius: 12px;
-  max-width: 920px;
-  width: 100%;
-  box-shadow: 0 6px 24px rgba(2, 6, 23, 0.6);
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 20px;
-}
-.logo {
-  width: 54px;
-  height: 54px;
-  border-radius: 10px;
-  background: #eef2ff;
-  color: #2563eb;
-}
-h1 {
-  margin: 0;
-  font-size: 20px;
-  color: #e6eef8;
-}
-p.lead {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-}
-.links {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
-}
-.btn-large {
-  background: var(--btn);
-  color: white;
-  padding: 12px 14px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-}
-.btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--muted);
-  padding: 10px;
-  border-radius: 10px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.meta {
-  color: var(--muted);
-  font-size: 13px;
-}
-.right {
-  background: linear-gradient(180deg, #071231, #08122a);
-  padding: 14px;
-  border-radius: 10px;
-}
-ul.features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-ul.features li {
-  background: rgba(255, 255, 255, 0.02);
-  padding: 10px;
-  border-radius: 8px;
-  color: var(--muted);
-  font-size: 14px;
-}
-/* Login card styles */
-.login-card {
-  margin-top: 12px;
-}
-.role-tabs { display:flex; gap:8px; margin-bottom:8px }
-.tab {
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.03);
-  color: var(--muted);
-  cursor: pointer;
-}
-.tab.active { background: rgba(255,255,255,0.03); color: #fff; border-color: rgba(255,255,255,0.08) }
-label { display:block; margin-top:8px; color: var(--muted); font-size:13px }
-input[type="email"], input[type="password"] {
-  width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent; color: #e6eef8
-}
-footer {
-  margin-top: 18px;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-}
-@media (max-width: 880px) {
-  .card {
-    grid-template-columns: 1fr;
-  }
-  .right {
-    order: -1;
-  }
-}
+/* css/index.css */
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    
-   
-    display: none; 
+.wrap {
+    display: flex;
     justify-content: center;
     align-items: center;
-    
-    z-index: 1000; 
-    opacity: 0; 
-    transition: opacity 0.2s ease-in-out;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-
-.modal-overlay.active {
-    display: flex; 
-    opacity: 1;  
+/* O card principal da página de login */
+.wrap > .card {
+    display: flex;
+    max-width: 900px;
+    width: 100%;
+    border-radius: 16px; /* Mais arredondado */
+    overflow: hidden;
+    padding: 0; /* Remove padding do global.css */
+    /* A sombra vem do global.css */
 }
 
-.modal-content {
-    background-color: #fff;
-    padding: 25px 30px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    width: 90%;
-    max-width: 400px; 
-    text-align: center;
-    position: relative; 
-    
-    transform: scale(0.9);
-    transition: transform 0.2s ease-in-out;
+/* Lado Esquerdo (Formulário de Login) */
+.wrap > .card > div:first-child { 
+    flex-basis: 55%;
+    padding: 40px;
+    background-color: var(--card-bg-color); /* Branco */
 }
 
-.modal-overlay.active .modal-content {
-    transform: scale(1);
+/* Lado Direito (Features) */
+.right { 
+    flex-basis: 45%;
+    padding: 40px;
+    background-color: #fbfdff; /* Um azul-claro muito sutil */
+    color: var(--text-secondary-color);
+    border-left: 1px solid var(--border-color);
+    font-size: 15px;
 }
 
-.modal-content h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #333; 
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
-.modal-content p {
+.logo {
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-color);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: 12px;
+}
+
+.brand h1 {
+    font-size: 24px;
+    margin: 0;
+    color: var(--text-color);
+}
+
+.meta {
+    font-size: 16px;
+    color: var(--text-secondary-color);
+}
+
+.lead {
+    font-size: 16px;
     margin-bottom: 25px;
-    color: #555;
-    font-size: 0.95rem;
-    line-height: 1.4;
+    color: var(--text-secondary-color);
 }
 
-.modal-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #aaa;
+/* Card de login interno */
+.login-card {
+    background-color: #fff;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+}
+
+.role-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background-color: #f9f9f9; /* Fundo inativo */
+    color: var(--text-secondary-color);
     cursor: pointer;
-    line-height: 1;
+    font-size: 16px;
+    transition: all 0.3s ease;
 }
-.modal-close-btn:hover {
-    color: #333;
+.tab:not(:last-child) {
+    border-right: 1px solid var(--border-color);
 }
 
-.modal-content .btn-login {
-    width: 120px; 
-    padding: 10px;
-    margin-top: 10px;
+.tab.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+/* Botão de ver senha */
+#btnTogglePwd {
+    color: var(--text-secondary-color) !important; 
+    background: transparent !important;
+}
+
+/* Links */
+#forgotPasswordLink {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-top: 10px !important; /* Ajuste do inline-style */
+}
+#forgotPasswordLink:hover {
+    text-decoration: underline;
+}
+
+a[href="admin-login.html"] {
+     color: var(--text-secondary-color) !important;
+     font-size: 14px !important;
+}
+
+footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.features {
+    padding-left: 20px;
+    color: #444;
+}
+.features li {
+    margin-bottom: 10px;
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin - Sistema de Chamados</title>
+
+    <link rel="stylesheet" href="css/global.css" />
+
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: var(--bg-color);
+      }
+
+      .admin-card {
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+      }
+
+      .admin-logo {
+        width: 60px;
+        height: 60px;
+        background-color: #d32f2f;
+        color: white;
+        display: grid;
+        place-items: center;
+        font-size: 26px;
+        font-weight: 700;
+        border-radius: 12px;
+        margin: 0 auto 20px auto;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .lead {
+        font-size: 16px;
+        margin-bottom: 30px;
+        color: var(--text-secondary-color);
+      }
+
+      form {
+        text-align: left;
+      }
+
+      #loginError {
+        text-align: center;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+      }
+
+      .back-link {
+        margin-top: 25px;
+        display: block;
+        font-size: 14px;
+        color: var(--text-secondary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card admin-card">
+      <div class="admin-logo">AD</div>
+      <h1>Acesso Administrativo</h1>
+      <p class="lead">Insira suas credenciais para gerenciar o sistema.</p>
+
+      <form id="adminLoginForm">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+
+        <label for="password" style="margin-top: 10px">Senha</label>
+        <input id="password" name="password" type="password" required />
+
+        <div style="margin-top: 25px">
+          <button type="submit" class="btn-large">Entrar</button>
+        </div>
+
+        <div id="loginError" style="margin-top: 15px; display: none"></div>
+      </form>
+
+      <a href="index.html" class="back-link"> Voltar ao login principal </a>
+    </div>
+  </body>
+  <script src="admin-login.js"></script>
+</html>

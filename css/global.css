@@ -1,74 +1,152 @@
+/* css/global.css */
+
 :root {
-  --font-stack: Inter, "Segoe UI", Helvetica, Arial, sans-serif;
+    --bg-color: #f4f7f6; /* Um branco levemente acinzentado para o fundo */
+    --card-bg-color: #ffffff; /* Branco puro para os cards e headers */
+    --text-color: #222222; /* Texto principal (preto suave) */
+    --text-secondary-color: #555555; /* Texto secundário (cinza escuro) */
+    --border-color: #e0e0e0; /* Bordas suaves */
+    
+    /* Cor primária para botões e links */
+    --primary-color: #007bff; 
+    --primary-hover-color: #0056b3;
+    --success: #059669; /* Verde para botões de sucesso */
+
+    /* Sombra padrão para os cards */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
 }
+
+/* Reset básico e estilos do Body */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 * {
-  box-sizing: border-box;
-}
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: var(--font-stack);
+    box-sizing: border-box;
 }
 
-/* Basic helpers shared across screens */
-a {
-  color: inherit;
-  text-decoration: none;
-}
-.muted {
-  font-size: 13px;
-}
 .container {
-  max-width: 1200px;
-  margin: 18px auto;
-  padding: 0 18px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    color: var(--text-color);
 }
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
 }
+a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos de formulário atualizados para o tema claro */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    display: inline-block;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fff; /* Fundo branco */
+    color: var(--text-color); /* Texto escuro */
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.2); /* Destaque suave ao focar */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-secondary-color);
+    font-size: 14px;
+}
+
+/* Botões */
+.btn, 
+button[type="submit"],
+.btn-large {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    text-decoration: none; /* Para links com classe .btn */
+    display: inline-block;
+    text-align: center;
+}
+
+.btn:hover, 
+button[type="submit"]:hover,
+.btn-large:hover {
+    background-color: var(--primary-hover-color);
+    color: white;
+    text-decoration: none;
+}
+
+/* Botão "Fantasma" (ex: admin-login.html) */
+.btn-ghost {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+.btn-ghost:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+
+/* Card Padrão (usado em admin.html, usuario.html, etc.) */
 .card {
-  border-radius: 10px;
-}
-.panel {
-  border-radius: 10px;
-}
-
-/* Button base: colors are set by the screen-specific CSS */
-.btn {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 0;
-  cursor: pointer;
-  font-weight: 700;
-}
-.ghost {
-  padding: 8px 10px;
-  border-radius: 8px;
-  
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
 }
 
-.badge {
-  display: inline-block;
-  padding: 6px 8px;
-  border-radius: 999px;
-  font-size: 12px;
+/* Caixas de Feedback */
+.error-box,
+#loginError {
+    color: #D32F2F;
+    background-color: #FFEBEE;
+    border: 1px solid #E57373;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: left;
 }
 
-/* Simple responsive utilities */
-@media (max-width: 900px) {
-  .container {
-    padding: 0 14px;
-  }
+.success-box {
+    color: #2E7D32;
+    background-color: #E8F5E9;
+    border: 1px solid #81C784;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: left;
 }
-
