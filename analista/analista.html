@@ -19,7 +19,6 @@
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center">
-        <button class="ghost" onclick="bulkRefresh()">Atualizar</button>
   <a class="ghost" href="../index.html" onclick="localStorage.removeItem('currentUser')">Início</a>
         <div id="analystBadge"
           style="
@@ -107,10 +106,10 @@
                 </div>
               </div>
               <div style="display: flex; gap: 8px; align-items: center">
-                <button class="ghost" onclick="sortBy('urg')">
+                <button class="ghost" id="btnSortUrg" onclick="sortBy('urg')">
                   Ordenar: Urgência
                 </button>
-                <button class="ghost" onclick="sortBy('updated')">
+                <button class="ghost" id="btnSortData" onclick="sortBy('updated')">
                   Ordenar: Data
                 </button>
               </div>
@@ -125,6 +124,7 @@
                     <th>Título</th>
                     <th>Urgência</th>
                     <th>IA (confiança)</th>
+                    <th>Últ. Atualização</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -147,6 +147,7 @@
                     <th>Título</th>
                     <th>Categoria</th>
                     <th>Status</th>
+                    <th>Última Atualização</th>
                     <th>Ações</th>
                   </tr>
                 </thead>

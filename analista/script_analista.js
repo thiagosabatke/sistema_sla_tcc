@@ -1,3 +1,19 @@
+function formatDateTime(isoString) {
+  if (!isoString) return '-';
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return isoString; 
+  }
+}
+
 async function loadAnalystTickets() {
   try {
     const response = await fetch('http://localhost:3000/api/tickets/analyst');
@@ -17,6 +33,8 @@ async function loadAnalystTickets() {
 }
 
 let tickets = []; 
+let currentSortKey = 'urg'; 
+let currentSortDirection = 'desc'; 
 
 try{
   const cur = localStorage.getItem('currentUser');
@@ -42,8 +60,9 @@ try{
 
 function refreshIndicators() {
   const crit = tickets.filter((t) =>
-    String(t.urg || "").toLowerCase().includes("crít") ||
-    String(t.urg || "").toLowerCase().includes("crit")
+    (String(t.urg || "").toLowerCase().includes("crít") ||
+     String(t.urg || "").toLowerCase().includes("crit")) &&
+     t.status !== "Resolvido"
   ).length;
   const pend = tickets.filter((t) => t.status === "Pendente").length;
   const critEl = document.getElementById("critCount"); 
@@ -82,10 +101,42 @@ function renderAnalystTable() {
   const body = document.getElementById("analystTable");
   body.innerHTML = "";
   const queueTickets = tickets.filter((t) => t.status !== "Resolvido");
-  const sorted = [...queueTickets].sort(
-    (a, b) =>
-      (b.urg === "Crítica") - (a.urg === "Crítica") || b.iaConf - a.iaConf
-  );
+
+  const urgMap = { 'Crítica': 4, 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+  const getUrgValue = (urg) => urgMap[urg] || 0;
+
+  let sorted = [];
+
+  if (currentSortKey === 'urg') {
+    sorted = [...queueTickets].sort((a, b) => {
+      const urgA = getUrgValue(a.urg);
+      const urgB = getUrgValue(b.urg);
+      
+      if (currentSortDirection === 'desc') {
+        if (urgB !== urgA) {
+          return urgB - urgA;
+        }
+        return (b.iaConf || 0) - (a.iaConf || 0);
+      } else {
+        if (urgA !== urgB) {
+          return urgA - urgB;
+        }
+        return (a.iaConf || 0) - (b.iaConf || 0);
+      }
+    });
+  } else { // 'updated'
+    sorted = [...queueTickets].sort((a, b) => {
+      const dateA = new Date(a.updated);
+      const dateB = new Date(b.updated);
+      
+      if (currentSortDirection === 'desc') {
+        return dateB - dateA; 
+      } else {
+        return dateA - dateB; 
+      }
+    });
+  }
+
   sorted.forEach((t) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${t.id}</td><td>${t.user}</td><td><b>${
@@ -96,7 +147,9 @@ function renderAnalystTable() {
       t.urg === "Crítica" ? "urg-crit" : ""
     }">${t.urg}</span></td><td>${Math.round(
       (t.iaConf || 0.5) * 100 
-    )}%</td><td><button class="btn" onclick="openDetail(${
+    )}%</td>
+    <td>${formatDateTime(t.updated)}</td>
+    <td><button class="btn" onclick="openDetail(${
       t.id
     })">Abrir</button></td>`;
     body.appendChild(tr);
@@ -106,7 +159,9 @@ function renderAnalystTable() {
   if (all) all.innerHTML = "";
   tickets.forEach((t) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${t.id}</td><td>${t.user}</td><td>${t.title}</td><td>${t.cat}</td><td>${t.status}</td><td><button class="ghost" onclick="openDetail(${t.id})">Abrir</button></td>`;
+    tr.innerHTML = `<td>${t.id}</td><td>${t.user}</td><td>${t.title}</td><td>${t.cat}</td><td>${t.status}</td>
+    <td>${formatDateTime(t.updated)}</td>
+    <td><button class="ghost" onclick="openDetail(${t.id})">Abrir</button></td>`;
     if (all) all.appendChild(tr);
   });
 
@@ -119,6 +174,29 @@ function renderAnalystTable() {
       tr.innerHTML = `<td>${t.id}</td><td>${t.title}</td><td>IA sem confiança</td><td><button class="ghost" onclick="openDetail(${t.id})">Revisar</button></td>`;
       if (pend) pend.appendChild(tr);
     });
+}
+
+
+function updateSortButtons() {
+  const btnSortUrg = document.getElementById('btnSortUrg');
+  const btnSortData = document.getElementById('btnSortData');
+  
+  if (!btnSortUrg || !btnSortData) return; 
+
+  btnSortUrg.innerText = 'Ordenar: Urgência';
+  btnSortData.innerText = 'Ordenar: Data';
+  btnSortUrg.classList.remove('active-sort');
+  btnSortData.classList.remove('active-sort');
+
+  const arrow = currentSortDirection === 'desc' ? '↓' : '↑';
+
+  if (currentSortKey === 'urg') {
+    btnSortUrg.innerText = `Ordenar: Urgência ${arrow}`;
+    btnSortUrg.classList.add('active-sort');
+  } else { // 'updated'
+    btnSortData.innerText = `Ordenar: Data ${arrow}`;
+    btnSortData.classList.add('active-sort');
+  }
 }
 
 function showView(id) {
@@ -154,7 +232,7 @@ async function openDetail(id) {
   document.getElementById("detailPanel").style.display = "block";
   document.getElementById("detailTitle").innerText = `#${t.id} — ${t.title}`;
   
-  document.getElementById("detailMeta").innerText = `Status: ${t.status} • ${t.user} • ${t.cat} • Atualizado: ${t.updated}`;
+  document.getElementById("detailMeta").innerText = `Status: ${t.status} • ${t.user} • ${t.cat} • Atualizado: ${formatDateTime(t.updated)}`;
 
   document.getElementById("detailDesc").innerText = t.desc; 
 
@@ -249,15 +327,19 @@ async function updateTicketStatus() {
     if (!data.success) throw new Error(data.message);
 
     t.status = newStatus; 
+    
+    t.updated = new Date().toISOString(); 
+
     alert("Status do chamado atualizado para: " + newStatus);
 
-    document.getElementById("detailMeta").innerText = `Status: ${t.status} • ${t.user} • ${t.cat} • Atualizado: ${t.updated}`;
+    document.getElementById("detailMeta").innerText = `Status: ${t.status} • ${t.user} • ${t.cat} • Atualizado: ${formatDateTime(t.updated)}`;
     renderAnalystTable(); 
     computeSLA();
     refreshIndicators();
     
   } catch (e) {
       alert("Erro ao atualizar status: " + (e.message || 'Erro desconhecido.'));
+      await init();
   }
 }
 
@@ -288,7 +370,12 @@ async function sendReply() {
     alert("Resposta enviada!");
     document.getElementById("quickResp").value = "";
     
-    openDetail(id); 
+    // Atualiza o timestamp localmente
+    const t = tickets.find((x) => x.id === id);
+    if(t) t.updated = new Date().toISOString();
+    
+    await openDetail(id);
+    renderAnalystTable(); 
     
   } catch (e) {
       alert("Erro ao enviar resposta: " + (e.message || 'Erro desconhecido.'));
@@ -314,22 +401,23 @@ function applyFilters() {
   all.innerHTML = "";
   filtered.forEach((t) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${t.id}</td><td>${t.user}</td><td>${t.title}</td><td>${t.cat}</td><td>${t.status}</td><td><button class="ghost" onclick="openDetail(${t.id})">Abrir</button></td>`;
+    tr.innerHTML = `<td>${t.id}</td><td>${t.user}</td><td>${t.title}</td><td>${t.cat}</td><td>${t.status}</td>
+    <td>${formatDateTime(t.updated)}</td>
+    <td><button class="ghost" onclick="openDetail(${t.id})">Abrir</button></td>`;
     all.appendChild(tr);
   });
 }
 
 function sortBy(key) {
-  if (key === "urg") {
-    tickets.sort(
-      (a, b) =>
-        (b.urg === "Crítica") - (a.urg === "Crítica") ||
-        b.iaConf - a.iaConf
-    );
+  if (key === currentSortKey) {
+
+    currentSortDirection = (currentSortDirection === 'desc') ? 'asc' : 'desc';
   } else {
-    tickets.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+    currentSortKey = key;
+    currentSortDirection = 'desc'; 
   }
   renderAnalystTable();
+  updateSortButtons(); 
 }
 
 async function bulkRefresh() {
@@ -340,8 +428,12 @@ async function bulkRefresh() {
 
 async function init() {
   tickets = await loadAnalystTickets(); 
+
+  currentSortKey = 'urg'; 
+  currentSortDirection = 'desc'; 
   
   renderAnalystTable();
+  updateSortButtons(); 
   computeSLA();
   refreshIndicators();
   

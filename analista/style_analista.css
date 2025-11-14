@@ -200,3 +200,9 @@
       .btn-resolver:hover {
         background: #047857;
       }
+
+      .ghost.active-sort {
+        color: #e6eef8; 
+        font-weight: 700;
+        background-color: rgba(255, 255, 255, 0.05);
+    }

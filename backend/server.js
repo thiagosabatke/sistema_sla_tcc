@@ -59,49 +59,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// app.post('/register', async (req, res) => {
-//     const { name, email, password, role } = req.body;
-
-//     if (!name || !email || !password || !role) {
-//         return res.status(400).json({ 
-//             success: false, 
-//             message: 'Todos os campos (nome, email, senha, perfil) são obrigatórios.' 
-//         });
-//     }
-
-//     try {
-//         const connection = await mysql.createConnection(dbConfig);
-        
-//         const [existing] = await connection.execute(
-//             'SELECT id FROM Users WHERE email = ?',
-//             [email]
-//         );
-
-//         if (existing.length > 0) {
-//             await connection.end();
-//             return res.status(409).json({ success: false, message: 'Este email já está cadastrado.' });
-//         }
-
-//         const [result] = await connection.execute(
-//             'INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)',
-//             [name, email, password, role]
-//         );
-        
-//         await connection.end();
-
-//         res.json({ success: true, userId: result.insertId, message: 'Usuário cadastrado com sucesso!' });
-
-//     } catch (error) {
-//         console.error("Erro no cadastro:", error);
-        
-//         if (error.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD') {
-//              return res.status(400).json({ success: false, message: 'Perfil (role) inválido. Use "usuario" ou "analista".' });
-//         }
-
-//         res.status(500).json({ success: false, message: 'Erro interno no servidor ao tentar cadastrar.' });
-//     }
-// });
-
 app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
 
@@ -301,7 +258,7 @@ app.get('/api/tickets/analyst', async (req, res) => {
             urg: t.urgency_ia,
             iaConf: t.ia_confidence,
             status: t.status,
-            updated: new Date(t.updated_at).toISOString().slice(0, 10),
+            updated: t.updated_at,
             desc: t.description
         }));
         res.json(formattedTickets);
@@ -331,7 +288,7 @@ app.get('/api/tickets/user/:userId', async (req, res) => {
             categoria: t.category,    
             urg: t.urgency_ia,        
             status: t.status,
-            updated: new Date(t.updated_at).toISOString().slice(0, 10),
+            updated: t.updated_at,
             desc: t.description      
         }));
 

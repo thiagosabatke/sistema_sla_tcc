@@ -1,3 +1,4 @@
+// [SISTEMA DE CHAMADOS] CONTEÚDO DO ARQUIVO: usuario/script_usuario.js
 
 try{
   const cur = localStorage.getItem('currentUser');
@@ -26,6 +27,23 @@ try{
     }
   }
 }catch(e){ console.warn('auth guard failed', e); window.location = '../index.html'; }
+
+function formatDateTime(isoString) {
+  if (!isoString) return '-';
+  try {
+    const date = new Date(isoString);
+    // Formata para dd/MM/yyyy HH:mm
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return isoString; // Retorna o original se falhar
+  }
+}
 
 async function loadUserTickets() {
   try {
@@ -82,7 +100,7 @@ function renderTables() {
       <td>${t.categoria}</td>
       <td><span class="badge ${urgClass(t.urg)}">${t.urg}</span></td>
       <td>${t.status}</td>
-      <td class="muted">${t.updated}</td>
+      <td class="muted">${formatDateTime(t.updated)}</td>
     `;
         body.appendChild(tr);
     });
@@ -98,6 +116,7 @@ function renderTables() {
     <td>${t.categoria}</td>
     <td><span class="badge ${urgClass(t.urg)}">${t.urg}</span></td>
     <td>${t.status}</td>
+    <td>${formatDateTime(t.updated)}</td>
     <td><button class="ghost" onclick="viewTicket(${t.id})">Visualizar</button></td>
   `;
     bodyAll.appendChild(tr);
@@ -111,7 +130,7 @@ function renderTables() {
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${t.id}</td><td>${t.titulo}</td><td>${
         t.satisf || "-"
-      }/5</td><td>${t.closed || t.updated || "-"}</td>`;
+      }/5</td><td>${formatDateTime(t.closed || t.updated)}</td>`;
       closed.appendChild(tr);
     });
 }
@@ -126,18 +145,27 @@ function urgClass(u) {
 }
 
 
-function switchTab(e) {
+function showTab(viewName) {
   document
     .querySelectorAll(".tab")
     .forEach((t) => t.classList.remove("active"));
-  e.currentTarget.classList.add("active");
-  const view = e.currentTarget.dataset.view;
+  
+  const tabButton = document.querySelector(`.tab[data-view="${viewName}"]`);
+  if (tabButton) {
+    tabButton.classList.add("active");
+  }
+
   document.getElementById("view-minha-lista").style.display =
-    view === "minha-lista" ? "block" : "none";
+    viewName === "minha-lista" ? "block" : "none";
   document.getElementById("view-abertos").style.display =
-    view === "abertos" ? "block" : "none";
+    viewName === "abertos" ? "block" : "none";
   document.getElementById("view-resolvidos").style.display =
-    view === "resolvidos" ? "block" : "none";
+    viewName === "resolvidos" ? "block" : "none";
+}
+
+function switchTab(e) {
+  const view = e.currentTarget.dataset.view;
+  showTab(view);
 }
 
 document
@@ -334,6 +362,13 @@ function filterTickets() {
     .getElementById("searchInput")
     .value.trim()
     .toLowerCase();
+
+  if (!q) {
+    renderTables(); 
+    showTab("minha-lista"); 
+    return; 
+  }
+
   const body = document.getElementById("ticketsBodyAll");
   body.innerHTML = "";
   tickets
@@ -348,11 +383,15 @@ function filterTickets() {
         t.urg
       }</span></td><td>${
         t.status
-      }</td><td><button class="ghost" onclick="viewTicket(${
+      }</td>
+      <td>${formatDateTime(t.updated)}</td>
+      <td><button class="ghost" onclick="viewTicket(${
         t.id
       })">Visualizar</button></td>`;
       body.appendChild(tr);
     });
+  
+  showTab("abertos");
 }
 
 let tickets = []; 
@@ -363,6 +402,7 @@ async function init() {
     
     renderCounts();
     renderTables();
+    showTab("minha-lista"); 
 }
 
 init();
