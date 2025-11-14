@@ -16,6 +16,10 @@
     const errorBox = $('adminError');
     const successBox = $('adminSuccess');
 
+    const newRoleSelect = $('newRole');
+    const areaGroup = $('areaAtendimentoGroup');
+    const newAreaInput = $('newArea'); 
+
     if (userNameDisplay) {
         userNameDisplay.textContent = currentUser.name || 'Admin';
     }
@@ -28,6 +32,19 @@
         });
     }
 
+    if (newRoleSelect && areaGroup) {
+        newRoleSelect.addEventListener('change', () => {
+            if (newRoleSelect.value === 'analista') {
+                areaGroup.style.display = 'block';
+                newAreaInput.required = true; 
+            } else {
+                areaGroup.style.display = 'none';
+                newAreaInput.required = false; 
+                newAreaInput.value = ''; 
+            }
+        });
+    }
+
     if (form) {
         form.addEventListener('submit', async (ev) => {
             ev.preventDefault();
@@ -37,7 +54,9 @@
             const name = $('newName').value.trim();
             const email = $('newEmail').value.trim().toLowerCase();
             const password = $('newPassword').value.trim();
-            const role = $('newRole').value;
+            const role = newRoleSelect.value;
+            
+            const area = newAreaInput.value; 
             
             const adminId = currentUser.id; 
 
@@ -47,17 +66,29 @@
                 return;
             }
 
+            if (role === 'analista' && !area) {
+                errorBox.textContent = 'Para analistas, a área de atendimento é obrigatória.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
             try {
+                const payload = { 
+                    name: name, 
+                    email: email, 
+                    password: password, 
+                    role: role,
+                    adminId: adminId
+                };
+
+                if (role === 'analista') {
+                    payload.area_atendimento = area;
+                }
+
                 const response = await fetch('http://localhost:3000/api/admin/create-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: name, 
-                        email: email, 
-                        password: password, 
-                        role: role,
-                        adminId: adminId 
-                    })
+                    body: JSON.stringify(payload) 
                 });
 
                 const data = await response.json();
@@ -69,6 +100,7 @@
                     successBox.textContent = data.message || 'Usuário criado com sucesso!';
                     successBox.style.display = 'block';
                     form.reset(); 
+                    areaGroup.style.display = 'none'; 
                 }
 
             } catch (e) {

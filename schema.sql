@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS Users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('usuario', 'analista', 'admin') NOT NULL 
+    role ENUM('usuario', 'analista', 'admin') NOT NULL,
+    area_atendimento VARCHAR(100) NULL -- <<< COLUNA ADICIONADA
 );
 
 CREATE TABLE IF NOT EXISTS Tickets (
@@ -44,17 +45,6 @@ CREATE TABLE IF NOT EXISTS TicketHistory (
     FOREIGN KEY (ticket_id) REFERENCES Tickets(id),
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
-
-INSERT INTO Users (name, email, password, role) VALUES 
-('João', 'joao@gmail.com', 'Joao123', 'analista'),
-('Gabriel', 'gabriel@gmail.com', 'Gabriel123', 'usuario')
-ON DUPLICATE KEY UPDATE name=name; 
-
-INSERT INTO Tickets (title, description, category, urgency_ia, user_id, status) VALUES
-('Meu PC não liga', 'Aperto o botão e nada acontece, nem a luz acende. Preciso de ajuda urgente.', 'Hardware', 'Crítica', 2, 'Aberto'),
-('Impressora não funciona', 'Envio documentos mas eles ficam na fila e não imprimem.', 'Hardware', 'Média', 2, 'Aberto'),
-('Solicitação de software', 'Gostaria de solicitar a instalação do Photoshop no meu notebook.', 'Software', 'Baixa', 2, 'Em Andamento')
-ON DUPLICATE KEY UPDATE title=title; 
 
 ALTER TABLE Users
 ADD COLUMN resetPasswordToken VARCHAR(255) NULL,

@@ -182,12 +182,19 @@ app.post('/admin-login', async (req, res) => {
 
 app.post('/api/admin/create-user', async (req, res) => {
 
-    const { name, email, password, role, adminId } = req.body;
+    const { name, email, password, role, adminId, area_atendimento } = req.body;
 
     if (!name || !email || !password || !role || !adminId) {
         return res.status(400).json({ 
             success: false, 
             message: 'Todos os campos (nome, email, senha, perfil, adminId) são obrigatórios.' 
+        });
+    }
+
+    if (role === 'analista' && !area_atendimento) {
+         return res.status(400).json({ 
+            success: false, 
+            message: 'A área de atendimento é obrigatória para analistas.' 
         });
     }
 
@@ -221,11 +228,12 @@ app.post('/api/admin/create-user', async (req, res) => {
             await connection.end();
             return res.status(409).json({ success: false, message: 'Este email já está cadastrado.' });
         }
+        
+        const areaValue = (role === 'analista') ? area_atendimento : null;
 
-        // 3. CRIAR O NOVO USUÁRIO
         const [result] = await connection.execute(
-            'INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            [name, email, password, role] 
+            'INSERT INTO Users (name, email, password, role, area_atendimento) VALUES (?, ?, ?, ?, ?)',
+            [name, email, password, role, areaValue] 
         );
         
         await connection.end();
