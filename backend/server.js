@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root', 
-    password: 'Thiago159753', // Coloque a senha do MySql aqui
+    password: 'SenhaGenrica', // Coloque a senha do MySql aqui
     database: 'meu_tcc_db'        
 };
 
