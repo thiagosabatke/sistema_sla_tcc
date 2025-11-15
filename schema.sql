@@ -1,8 +1,3 @@
--- --------------------------------------------------------
--- Script de Criação do Banco de Dados para TCC Sistema de Chamados
--- --------------------------------------------------------
-
-
 CREATE DATABASE IF NOT EXISTS meu_tcc_db;
 
 
@@ -15,7 +10,9 @@ CREATE TABLE IF NOT EXISTS Users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('usuario', 'analista', 'admin') NOT NULL,
-    area_atendimento VARCHAR(100) NULL -- <<< COLUNA ADICIONADA
+    area_atendimento VARCHAR(100) NULL,
+    resetPasswordToken VARCHAR(255) NULL, 
+    resetPasswordExpires DATETIME NULL    
 );
 
 CREATE TABLE IF NOT EXISTS Tickets (
@@ -46,6 +43,5 @@ CREATE TABLE IF NOT EXISTS TicketHistory (
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
-ALTER TABLE Users
-ADD COLUMN resetPasswordToken VARCHAR(255) NULL,
-ADD COLUMN resetPasswordExpires DATETIME NULL;
+INSERT INTO Users (name, email, password, role,) VALUES
+('Admin User', 'admin@gmail.com', 'Admin123', 'admin');
